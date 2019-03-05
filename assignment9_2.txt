@@ -1,0 +1,86 @@
+1. Use the below given data set
+DataSet
+  Ans:
+   
+    >df <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/00273/Example_WearableComputing_weight_lifting_exercises_biceps_curl_variations.csv",
+               header = FALSE)
+
+    >data<-df[-1,]
+    >head(data)
+    >colnames(data) <- as.character(unlist(data[1,]))
+    >data1 = data[-1, ]
+
+    >data1<-as.data.frame(lapply(data1, as.integer))
+
+    >table(data1$classe)
+
+
+    >data1$classe<-as.factor(data1$classe)
+    >head(data1)
+
+    >replacement_vec <- c("A", "B", "C", "D","E")
+    >levels(data1$classe) <- replacement_vec
+
+2. Perform the below given activities:
+a. Create classification model using different decision trees.
+  Ans:
+    #decision tree with party pakage
+
+    >library(party)
+    >tree<-ctree(classe~.,data=data1) 
+    >tree
+    >plot(tree)
+
+    >#predctions
+
+    >predict(tree,data1)
+
+    >cm<-table(predict(tree),data1$classe)
+
+   ##decision tree with rpart pakage
+    >library(rpart)
+    >tree1<-rpart(classe~.,data=data1)
+    >library(rpart.plot)
+    >rpart.plot(tree1,extra=4,cex = 0.6)
+
+b. Verify model goodness of fit.
+  Ans:
+    ##model goodness of fit
+    >actual<-table(data1$classe)
+    >expected<-table(predict(tree))
+
+    >chisq.test(actual, p = expected/sum(expected))
+
+c. Apply all the model validation techniques.
+   Ans:
+     >library(caret)
+
+
+     >train_control<- trainControl(method="cv", number=10, savePredictions = TRUE)
+
+     >model<- train(classe~., data=data1, trControl=train_control, method="rpart")
+
+     >model$pred
+
+     >modle1<-train(classe~., data=data1, trControl=train_control, method="ctree")
+
+d. Make conclusions
+   Ans:
+     >model
+    cp         Accuracy   Kappa    
+  0.1039940  0.9304457  0.8990790
+  0.3394876  0.7466148  0.6179779
+  0.5143180  0.5435233  0.3085186
+
+ #For "rpart"  Accuracy was used to select the optimal model using the largest value.
+   The final value used for the model was cp = 0.103994
+
+   >modle1 
+     mincriterion  Accuracy  Kappa
+         0.01          1         1    
+         0.50          1         1    
+         0.99          1         1    
+
+    #for cAccuracy was used to select the optimal model using the largest value.
+    The final value used for the model was mincriterion = 0.99.
+    
